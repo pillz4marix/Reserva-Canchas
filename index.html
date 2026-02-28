@@ -11,35 +11,18 @@
 
     <style>
         :root {
-            --bg: #050505; 
-            --card: #0f0f0f; 
-            --border: #1f1f1f;
-            --text-p: #ffffff; 
-            --text-s: #71717a; 
-            --accent: #ffffff;
-            --error: #ff4444; 
-            --success: #00ff88;
-            --calendar: #4285f4;
+            --bg: #050505; --card: #0f0f0f; --border: #1f1f1f;
+            --text-p: #ffffff; --text-s: #71717a; --accent: #ffffff;
+            --error: #ff4444; --success: #00ff88;
         }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', 'Segoe UI', sans-serif; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
         body { background: var(--bg); color: var(--text-p); overflow-x: hidden; }
-        
-        .container { 
-            width: 100%; 
-            max-width: 500px; 
-            margin: 0 auto; 
-            padding: 20px; 
-            transition: all 0.3s ease;
-        }
+        .container { width: 100%; max-width: 500px; margin: 0 auto; padding: 20px; }
 
         @media (min-width: 900px) {
             .container { max-width: 1000px; }
-            #schedule-list, .info-grid { 
-                display: grid; 
-                grid-template-columns: 1fr 1fr; 
-                gap: 20px; 
-            }
+            #schedule-list, .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
         }
 
         .nav-header { display: flex; justify-content: space-between; align-items: center; padding: 20px 0; }
@@ -51,44 +34,29 @@
             transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1); z-index: 1000; padding: 60px 20px;
         }
         .side-menu.open { left: 0; }
-        .menu-item { padding: 18px; border-bottom: 1px solid var(--border); cursor: pointer; list-style: none; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; color: var(--text-s); }
+        .menu-item { padding: 18px; border-bottom: 1px solid var(--border); cursor: pointer; list-style: none; font-size: 0.75rem; text-transform: uppercase; color: var(--text-s); }
         .menu-item:hover { color: white; }
 
         .overlay { position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); display:none; z-index: 999; }
         .overlay.show { display:block; }
 
         .card { background: var(--card); border: 1px solid var(--border); padding: 40px; border-radius: 20px; margin-top: 50px; }
-        
         input { width: 100%; background: #151515; border: 1px solid var(--border); padding: 16px; color: white; border-radius: 10px; margin-bottom: 15px; outline: none; }
-        input:focus { border-color: var(--accent); }
-        
-        .pass-container { position: relative; width: 100%; }
-        .toggle-pass { position: absolute; right: 15px; top: 16px; color: var(--text-s); font-size: 0.7rem; cursor: pointer; text-transform: uppercase; letter-spacing: 1px; }
-
         .btn-p { width: 100%; padding: 16px; background: var(--accent); color: black; border: none; font-weight: 700; cursor: pointer; border-radius: 10px; text-transform: uppercase; }
         
         .date-control {
             display: flex; align-items: center; justify-content: space-between;
             background: var(--card); border: 1px solid var(--border); padding: 15px; border-radius: 15px; margin: 20px 0;
         }
-        .date-display h2 { font-size: 1.1rem; text-transform: uppercase; letter-spacing: 2px; text-align: center; }
-        .date-display p { font-size: 0.75rem; color: var(--text-s); margin-top: 4px; text-align: center; }
-
-        .btn-nav {
-            background: #1a1a1a; border: 1px solid var(--border); color: white;
-            width: 45px; height: 45px; border-radius: 50%; cursor: pointer;
-        }
+        .btn-nav { background: #1a1a1a; border: 1px solid var(--border); color: white; width: 45px; height: 45px; border-radius: 50%; cursor: pointer; }
         .btn-nav:disabled { opacity: 0.1; }
 
         .slot { border-bottom: 1px solid var(--border); padding: 15px 0; }
         .cancha-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; }
-
-        .btn-action { background: transparent; border: 1px solid var(--border); color: white; padding: 10px 20px; font-size: 0.75rem; font-weight: 600; border-radius: 8px; cursor: pointer; }
-        .btn-cal { background: var(--calendar); border: none; color: white; padding: 10px; border-radius: 8px; cursor: pointer; font-size: 0.7rem; margin-right: 10px; display: flex; align-items: center; gap: 5px; }
+        .btn-action { background: transparent; border: 1px solid var(--border); color: white; padding: 10px 20px; font-size: 0.75rem; border-radius: 8px; cursor: pointer; }
         
-        .badge-icon { position: absolute; top: -5px; right: -5px; background: var(--error); color: white; font-size: 0.6rem; width: 16px; height: 16px; border-radius: 50%; display: flex; align-items: center; justify-content: center; display: none; }
+        .badge-icon { position: absolute; top: -5px; right: -5px; background: var(--error); color: white; font-size: 0.6rem; width: 16px; height: 16px; border-radius: 50%; display: none; align-items: center; justify-content: center; }
         .hidden { display: none !important; }
-
         label { display: block; margin-bottom: 5px; font-size: 0.65rem; color: var(--text-s); font-weight: 600; }
     </style>
 </head>
@@ -109,18 +77,17 @@
     <div id="auth-section" class="card" style="max-width: 400px; margin: 80px auto;">
         <h2 style="text-align: center; margin-bottom: 30px; letter-spacing: 4px; font-weight: 300;">SGP CLOUD</h2>
         <input type="email" id="email" placeholder="Email">
-        <div class="pass-container">
-            <input type="password" id="pass" placeholder="Password" onkeydown="handleAuthEnter(event)">
-            <span class="toggle-pass" onclick="togglePassword('pass')">Ver</span>
-        </div>
+        <input type="password" id="pass" placeholder="Password" onkeydown="handleAuthEnter(event)">
         <div id="reg-extra" class="hidden">
-            <div class="pass-container">
-                <input type="password" id="pass-conf" placeholder="Confirmar Password" onkeydown="handleAuthEnter(event)">
-                <span class="toggle-pass" onclick="togglePassword('pass-conf')">Ver</span>
-            </div>
+            <input type="password" id="pass-conf" placeholder="Confirmar Password">
         </div>
         <button class="btn-p" onclick="handleAuth()" id="btn-main-auth">Entrar</button>
-        <p style="text-align:center; font-size:0.8rem; margin-top:25px; color:var(--text-s)">¿No tiene cuenta? <span onclick="toggleAuth()" style="color:white; text-decoration:underline; cursor:pointer;">Crear una</span></p>
+        
+        <p style="text-align:center; font-size:0.75rem; margin-top:15px;">
+            <span onclick="forgotPassword()" style="color:var(--text-s); cursor:pointer;">¿Olvidó su contraseña?</span>
+        </p>
+
+        <p style="text-align:center; font-size:0.8rem; margin-top:20px; color:var(--text-s)">¿No tiene cuenta? <span onclick="toggleAuth()" style="color:white; text-decoration:underline; cursor:pointer;">Crear una</span></p>
     </div>
 
     <div id="app-section" class="hidden">
@@ -134,9 +101,9 @@
         <div id="view-reservar" class="hidden">
             <div class="date-control">
                 <button class="btn-nav" id="prev-day" onclick="changeDay(-1)">‹</button>
-                <div class="date-display">
-                    <h2 id="display-date-name">Cargando...</h2>
-                    <p id="display-full-date"></p>
+                <div style="text-align: center;">
+                    <h2 id="display-date-name" style="font-size: 1.1rem; letter-spacing: 2px;"></h2>
+                    <p id="display-full-date" style="font-size: 0.75rem; color: var(--text-s);"></p>
                 </div>
                 <button class="btn-nav" id="next-day" onclick="changeDay(1)">›</button>
             </div>
@@ -144,29 +111,29 @@
         </div>
 
         <div id="view-mis-reservas" class="hidden">
-            <h2 style="margin-bottom: 25px; font-weight: 400;">Mis Reservas</h2>
+            <h2 style="margin-bottom: 25px; font-weight: 400;">Sus Reservas</h2>
             <div id="my-reservations-list"></div>
         </div>
 
         <div id="view-info" class="hidden">
             <h2 style="margin-bottom: 25px; font-weight: 400;">Detalles</h2>
             <div class="info-grid">
-                <div class="info-card" style="background: #0a0a0a; border: 1px solid var(--border); padding: 20px; border-radius: 12px; margin-bottom: 15px; cursor: pointer;" onclick="window.open('https://maps.app.goo.gl/smt2wC8yPApUYDTW8')">
-                    <h4 style="font-size: 0.7rem; color: var(--text-s); margin-bottom: 10px; letter-spacing: 1px;">UBICACIÓN</h4>
-                    <p>Haga clic para abrir en Google Maps.</p>
+                <div class="info-card" style="background: #0a0a0a; border: 1px solid var(--border); padding: 20px; border-radius: 12px; margin-bottom: 15px; cursor: pointer;" onclick="window.open('https://maps.google.com')">
+                    <h4 style="font-size: 0.6rem; color: var(--text-s); margin-bottom: 10px; letter-spacing: 1px;">UBICACIÓN</h4>
+                    <p>Google Maps</p>
                 </div>
                 <div class="info-card" style="background: #0a0a0a; border: 1px solid var(--border); padding: 20px; border-radius: 12px; margin-bottom: 15px;">
-                    <h4 style="font-size: 0.7rem; color: var(--text-s); margin-bottom: 10px; letter-spacing: 1px;">CONTACTO</h4>
-                    <p>WhatsApp: <strong>+52 614 253 1256</strong></p>
-                    <button class="btn-action" style="margin-top:10px; width:100%" onclick="window.open('https://wa.me/526142531256')">Enviar Mensaje</button>
+                    <h4 style="font-size: 0.6rem; color: var(--text-s); margin-bottom: 10px; letter-spacing: 1px;">CONTACTO</h4>
+                    <p>+52 614 253 1256</p>
+                    <button class="btn-action" style="margin-top:15px; width:100%; border-color: var(--success); color: var(--success);" onclick="window.open('https://wa.me/526142531256')">Enviar Mensaje</button>
                 </div>
                 <div class="info-card" style="background: #0a0a0a; border: 1px solid var(--border); padding: 20px; border-radius: 12px; margin-bottom: 15px;">
-                    <h4 style="font-size: 0.7rem; color: var(--text-s); margin-bottom: 10px; letter-spacing: 1px;">PRECIOS</h4>
-                    <p>Los precios pueden cotizarse en las oficinas o por vía WhatsApp.</p>
+                    <h4 style="font-size: 0.6rem; color: var(--text-s); margin-bottom: 10px; letter-spacing: 1px;">PRECIOS</h4>
+                    <p>Consultar por WhatsApp.</p>
                 </div>
                 <div class="info-card" style="background: #0a0a0a; border: 1px solid var(--border); padding: 20px; border-radius: 12px; margin-bottom: 15px;">
-                    <h4 style="font-size: 0.7rem; color: var(--text-s); margin-bottom: 10px; letter-spacing: 1px;">REGLAMENTO</h4>
-                    <p style="font-size: 0.85rem; line-height: 1.5;">• Calzado deportivo.<br>• No alimentos.<br>• Tolerancia 15 min.</p>
+                    <h4 style="font-size: 0.6rem; color: var(--text-s); margin-bottom: 10px; letter-spacing: 1px;">REGLAMENTO</h4>
+                    <p style="font-size: 0.8rem;">Calzado deportivo obligatorio.</p>
                 </div>
             </div>
         </div>
@@ -175,13 +142,13 @@
             <h2 style="margin-bottom: 25px; font-weight: 400;">Perfil</h2>
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
                 <div style="grid-column: span 2;"><label>EMAIL</label><input type="text" id="u-email" disabled></div>
-                <div style="grid-column: span 2;"><label>NOMBRE(S)</label><input type="text" id="u-nombre" placeholder="Obligatorio"></div>
-                <div><label>APELLIDO PATERNO</label><input type="text" id="u-paterno" placeholder="Obligatorio"></div>
-                <div><label>APELLIDO MATERNO</label><input type="text" id="u-materno" placeholder="Opcional"></div>
-                <div style="grid-column: span 2;"><label>TELÉFONO CELULAR</label><input type="tel" id="u-phone" placeholder="10 dígitos"></div>
+                <div style="grid-column: span 2;"><label>NOMBRE(S)</label><input type="text" id="u-nombre"></div>
+                <div><label>APELLIDO PATERNO</label><input type="text" id="u-paterno"></div>
+                <div><label>APELLIDO MATERNO</label><input type="text" id="u-materno"></div>
+                <div style="grid-column: span 2;"><label>TELÉFONO</label><input type="tel" id="u-phone"></div>
             </div>
-            <button class="btn-p" onclick="saveProfile()">Actualizar Datos</button>
-            <p id="profile-success" style="color: var(--success); font-size: 0.8rem; text-align: center; margin-top: 15px; display: none;">¡Cambios guardados!</p>
+            <button class="btn-p" onclick="saveProfile()">Actualizar</button>
+            <p id="profile-success" style="color: var(--success); font-size: 0.8rem; text-align: center; margin-top: 15px; display: none;">¡Guardado!</p>
         </div>
     </div>
 </div>
@@ -197,44 +164,49 @@
         appId: "1:278418928966:web:695adf6cbeee5dafb42147"
     };
     firebase.initializeApp(firebaseConfig);
-    const auth = firebase.auth();
-    const db = firebase.database();
+    const auth = firebase.auth(), db = firebase.database();
 
-    let isLogin = true; 
-    let currentViewingDate = new Date();
+    let isLogin = true, currentViewingDate = new Date();
     const today = new Date();
-    const hours = ["16:00 - 18:00", "18:00 - 20:00"];
-    const canchas = ["Cancha 1", "Cancha 2"];
+    const hours = ["16:00 - 18:00", "18:00 - 20:00"], canchas = ["Cancha 1", "Cancha 2"];
 
-    function togglePassword(id) {
-        const input = document.getElementById(id);
-        input.type = input.type === "password" ? "text" : "password";
-    }
-
-    function handleAuthEnter(event) { if (event.key === "Enter") handleAuth(); }
-
+    function handleAuthEnter(e) { if (e.key === "Enter") handleAuth(); }
+    
     async function handleAuth() {
-        const email = document.getElementById('email').value.trim();
-        const pass = document.getElementById('pass').value;
-        if(!email || !pass) return alert("Por favor complete los campos.");
+        const email = document.getElementById('email').value.trim(), pass = document.getElementById('pass').value;
+        if(!email || !pass) return alert("Complete los datos.");
         try {
             if(isLogin) await auth.signInWithEmailAndPassword(email, pass);
             else {
                 const cred = await auth.createUserWithEmailAndPassword(email, pass);
-                const key = email.replace(/\./g, '_');
-                await db.ref('usuarios/' + key).set({ email, uid: cred.user.uid, nombre: "", paterno: "", materno: "", telefono: "" });
+                await db.ref('usuarios/' + email.replace(/\./g, '_')).set({ email, uid: cred.user.uid, nombre: "", paterno: "", materno: "", telefono: "" });
             }
         } catch(e) { alert(e.message); }
+    }
+
+    function forgotPassword() {
+        const email = document.getElementById('email').value.trim();
+        if(!email) return alert("Por favor, ingrese usted su correo electrónico primero.");
+        auth.sendPasswordResetEmail(email).then(() => alert("Se ha enviado un enlace a su correo.")).catch(e => alert(e.message));
     }
 
     function updateDateUI() {
         document.getElementById('display-date-name').innerText = currentViewingDate.toLocaleDateString('es-ES', { weekday: 'long' }).toUpperCase();
         document.getElementById('display-full-date').innerText = currentViewingDate.toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' });
         document.getElementById('prev-day').disabled = currentViewingDate.toDateString() === today.toDateString();
-        renderSchedule();
+        
+        if (currentViewingDate.getDay() === 0) {
+            document.getElementById('schedule-list').innerHTML = '<p style="text-align:center; margin-top:40px; color:var(--text-s);">DOMINGOS CERRADO</p>';
+        } else {
+            renderSchedule();
+        }
     }
 
-    function changeDay(delta) { currentViewingDate.setDate(currentViewingDate.getDate() + delta); updateDateUI(); }
+    function changeDay(delta) {
+        currentViewingDate.setDate(currentViewingDate.getDate() + delta);
+        if (currentViewingDate.getDay() === 0) currentViewingDate.setDate(currentViewingDate.getDate() + (delta > 0 ? 1 : -1));
+        updateDateUI();
+    }
 
     function renderSchedule() {
         const dateKey = currentViewingDate.toISOString().split('T')[0];
@@ -246,16 +218,14 @@
             const container = document.getElementById('schedule-list');
             container.innerHTML = '';
             hours.forEach(h => {
-                const hKey = h.replace(/[:\s]/g, '_');
-                const hourStart = parseInt(h.split(':')[0]);
+                const hKey = h.replace(/[:\s]/g, '_'), hourStart = parseInt(h.split(':')[0]);
                 const isPast = isToday && hourStart <= currentHour;
                 let html = `<div class="slot"><p style="font-weight:600; font-size:0.75rem; color:var(--text-s); margin-bottom:10px;">${h}</p>`;
                 canchas.forEach(c => {
-                    const cKey = c.replace(/\s/g, '');
-                    const resBy = data[hKey] ? data[hKey][cKey] : null;
+                    const cKey = c.replace(/\s/g, ''), resBy = data[hKey] ? data[hKey][cKey] : null;
                     let btn = "";
                     if(isPast) btn = `<button class="btn-action" disabled style="opacity:0.2">Cerrado</button>`;
-                    else if(resBy === 'BLOQUEADO') btn = `<button class="btn-action" disabled style="color:var(--error); border:none;">No Disp.</button>`;
+                    else if(resBy === 'BLOQUEADO') btn = `<button class="btn-action" disabled>No Disp.</button>`;
                     else if(resBy === auth.currentUser.email) btn = `<button class="btn-action" style="color:var(--error); border-color:var(--error)" onclick="cancel('${dateKey}','${hKey}','${cKey}')">Cancelar</button>`;
                     else if(resBy) btn = `<button class="btn-action" disabled style="opacity:0.2">Ocupado</button>`;
                     else btn = `<button class="btn-action" onclick="book('${dateKey}','${hKey}','${cKey}')">Reservar</button>`;
@@ -267,15 +237,12 @@
     }
 
     function book(d, hK, cK) { db.ref(`reservas/${d}/${hK}/${cK}`).set(auth.currentUser.email); }
-    function cancel(d, hK, cK) { if(confirm("¿Desea usted cancelar?")) db.ref(`reservas/${d}/${hK}/${cK}`).remove(); }
+    function cancel(d, hK, cK) { if(confirm("¿Usted desea cancelar?")) db.ref(`reservas/${d}/${hK}/${cK}`).remove(); }
 
     function loadMyReservations() {
-        const container = document.getElementById('my-reservations-list');
-        const email = auth.currentUser.email;
+        const container = document.getElementById('my-reservations-list'), email = auth.currentUser.email;
         db.ref('reservas').on('value', snap => {
-            const all = snap.val() || {};
-            container.innerHTML = '';
-            let has = false;
+            const all = snap.val() || {}; container.innerHTML = ''; let has = false;
             Object.keys(all).forEach(day => {
                 Object.keys(all[day]).forEach(hK => {
                     Object.keys(all[day][hK]).forEach(cK => {
@@ -290,7 +257,7 @@
                     });
                 });
             });
-            if(!has) container.innerHTML = '<p style="color:var(--text-s); text-align:center; margin-top:40px;">No tiene turnos pendientes.</p>';
+            if(!has) container.innerHTML = '<p style="color:var(--text-s); text-align:center; margin-top:40px;">Sin turnos.</p>';
         });
     }
 
@@ -310,7 +277,7 @@
 
     async function saveProfile() {
         const n = document.getElementById('u-nombre').value.trim(), p = document.getElementById('u-paterno').value.trim(), ph = document.getElementById('u-phone').value.trim(), m = document.getElementById('u-materno').value.trim();
-        if (!n || !p || !ph) return alert("Complete los campos obligatorios.");
+        if (!n || !p || !ph) return alert("Usted debe llenar los campos obligatorios.");
         await db.ref('usuarios/' + auth.currentUser.email.replace(/\./g, '_')).update({ nombre: n, paterno: p, materno: m, telefono: ph });
         document.getElementById('profile-success').style.display = 'block';
         setTimeout(() => document.getElementById('profile-success').style.display = 'none', 3000);
@@ -320,6 +287,7 @@
         if (user) {
             document.getElementById('auth-section').classList.add('hidden');
             document.getElementById('app-section').classList.remove('hidden');
+            if (currentViewingDate.getDay() === 0) currentViewingDate.setDate(currentViewingDate.getDate() + 1);
             updateDateUI(); checkProfileData();
             showSection(localStorage.getItem('currentSection') || 'reservar', true);
         } else {
@@ -337,7 +305,7 @@
     }
 
     function toggleMenu() { document.getElementById('side-menu').classList.toggle('open'); document.getElementById('overlay').classList.toggle('show'); }
-    function toggleAuth() { isLogin = !isLogin; document.getElementById('btn-main-auth').innerText = isLogin ? "Entrar" : "Crear Cuenta"; document.getElementById('reg-extra').classList.toggle('hidden', isLogin); }
+    function toggleAuth() { isLogin = !isLogin; document.getElementById('btn-main-auth').innerText = isLogin ? "Entrar" : "Crear"; document.getElementById('reg-extra').classList.toggle('hidden', isLogin); }
     function logout() { localStorage.removeItem('currentSection'); auth.signOut().then(() => location.reload()); }
 </script>
 </body>
