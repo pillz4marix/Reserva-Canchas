@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SGP Cloud - Reserva de Canchas</title>
+
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+
+    <style>
+        :root {
+            --bg: #050505; 
+            --card: #0f0f0f; 
+            --border: #1f1f1f;
+            --text-p: #ffffff; 
+            --text-s: #71717a; 
+            --accent: #ffffff;
+            --error: #ff4444; 
+            --success: #00ff88;
+            --calendar: #4285f4;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', 'Segoe UI', sans-serif; }
+        body { background: var(--bg); color: var(--text-p); overflow-x: hidden; }
+        
+        .container { 
+            width: 100%; 
+            max-width: 500px; 
+            margin: 0 auto; 
+            padding: 20px; 
+            transition: all 0.3s ease;
+        }
+
+        @media (min-width: 900px) {
+            .container { max-width: 1000px; }
+            #schedule-list, .info-grid { 
+                display: grid; 
+                grid-template-columns: 1fr 1fr; 
+                gap: 20px; 
+            }
+        }
+
+        .nav-header { display: flex; justify-content: space-between; align-items: center; padding: 20px 0; }
+        .btn-menu { background: none; border: none; color: white; font-size: 1.5rem; cursor: pointer; position: relative; }
+        
+        .side-menu {
+            position: fixed; top: 0; left: -280px; width: 280px; height: 100%;
+            background: var(--card); border-right: 1px solid var(--border);
+            transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1); z-index: 1000; padding: 60px 20px;
+        }
+        .side-menu.open { left: 0; }
+        .menu-item { padding: 18px; border-bottom: 1px solid var(--border); cursor: pointer; list-style: none; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; color: var(--text-s); }
+        .menu-item:hover { color: white; }
+
+        .overlay { position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); display:none; z-index: 999; }
+        .overlay.show { display:block; }
+
+        .card { background: var(--card); border: 1px solid var(--border); padding: 40px; border-radius: 20px; margin-top: 50px; }
+        
+        input { width: 100%; background: #151515; border: 1px solid var(--border); padding: 16px; color: white; border-radius: 10px; margin-bottom: 15px; outline: none; }
+        input:focus { border-color: var(--accent); }
+        
+        /* Contenedor para password con ojo */
+        .pass-container { position: relative; width: 100%; }
+        .toggle-pass { position: absolute; right: 15px; top: 16px; color: var(--text-s); font-size: 0.7rem; cursor: pointer; text-transform: uppercase; letter-spacing: 1px; }
+
+        .btn-p { width: 100%; padding: 16px; background: var(--accent); color: black; border: none; font-weight: 700; cursor: pointer; border-radius: 10px; text-transform: uppercase; }
+        
+        .date-control {
+            display: flex; align-items: center; justify-content: space-between;
+            background: var(--card); border: 1px solid var(--border); padding: 15px; border-radius: 15px; margin: 20px 0;
+        }
+        .date-display h2 { font-size: 1.1rem; text-transform: uppercase; letter-spacing: 2px; text-align: center; }
+        .date-display p { font-size: 0.75rem; color: var(--text-s); margin-top: 4px; text-align: center; }
+
+        .btn-nav {
+            background: #1a1a1a; border: 1px solid var(--border); color: white;
+            width: 45px; height: 45px; border-radius: 50%; cursor: pointer;
+        }
+        .btn-nav:disabled { opacity: 0.1; }
+
+        .slot { border-bottom: 1px solid var(--border); padding: 15px 0; }
+        .cancha-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; }
+
+        .btn-action { background: transparent; border: 1px solid var(--border); color: white; padding: 10px 20px; font-size: 0.75rem; font-weight: 600; border-radius: 8px; cursor: pointer; }
+        .btn-cal { background: var(--calendar); border: none; color: white; padding: 10px; border-radius: 8px; cursor: pointer; font-size: 0.7rem; margin-right: 10px; display: flex; align-items: center; gap: 5px; }
+        
+        .badge-icon { position: absolute; top: -5px; right: -5px; background: var(--error); color: white; font-size: 0.6rem; width: 16px; height: 16px; border-radius: 50%; display: flex; align-items: center; justify-content: center; display: none; }
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+
+<div class="overlay" id="overlay" onclick="toggleMenu()"></div>
+
+<nav class="side-menu" id="side-menu">
+    <h3 style="margin-bottom: 30px; font-size: 0.7rem; color: var(--text-s); letter-spacing: 3px;">SGP CLOUD</h3>
+    <li class="menu-item" onclick="showSection('reservar')">Reservar Turno</li>
+    <li class="menu-item" onclick="showSection('mis-reservas')">Mis Reservas</li>
+    <li class="menu-item" onclick="showSection('info')">Información Cancha</li>
+    <li class="menu-item" onclick="showSection('perfil')">Configurar Perfil</li>
+    <li class="menu-item" style="color: var(--error); margin-top: 40px; border: none;" onclick="logout()">Cerrar Sesión</li>
+</nav>
+
+<div class="container">
+    <div id="auth-section" class="card" style="max-width: 400px; margin: 80px auto;">
+        <h2 style="text-align: center; margin-bottom: 30px; letter-spacing: 4px; font-weight: 300;">SGP CLOUD</h2>
+        <input type="email" id="email" placeholder="Email">
+        
+        <div class="pass-container">
+            <input type="password" id="pass" placeholder="Password" onkeydown="handleAuthEnter(event)">
+            <span class="toggle-pass" onclick="togglePassword('pass')">Ver</span>
+        </div>
+
+        <div id="reg-extra" class="hidden">
+            <div class="pass-container">
+                <input type="password" id="pass-conf" placeholder="Confirmar Password" onkeydown="handleAuthEnter(event)">
+                <span class="toggle-pass" onclick="togglePassword('pass-conf')">Ver</span>
+            </div>
+        </div>
+
+        <button class="btn-p" onclick="handleAuth()" id="btn-main-auth">Entrar</button>
+        <p style="text-align:center; font-size:0.8rem; margin-top:25px; color:var(--text-s)">¿No tiene cuenta? <span onclick="toggleAuth()" style="color:white; text-decoration:underline; cursor:pointer;">Crear una</span></p>
+    </div>
+
+    <div id="app-section" class="hidden">
+        <div class="nav-header">
+            <button class="btn-menu" onclick="toggleMenu()">
+                ☰ <div id="icon-badge" class="badge-icon">!</div>
+            </button>
+            <div style="font-size: 0.7rem; letter-spacing: 2px; color: var(--text-s);">HOLA, <span id="user-display" style="color: white; font-weight: bold;"></span></div>
+        </div>
+
+        <div id="view-reservar" class="hidden">
+            <div class="date-control">
+                <button class="btn-nav" id="prev-day" onclick="changeDay(-1)">‹</button>
+                <div class="date-display">
+                    <h2 id="display-date-name">Cargando...</h2>
+                    <p id="display-full-date"></p>
+                </div>
+                <button class="btn-nav" id="next-day" onclick="changeDay(1)">›</button>
+            </div>
+            <div id="schedule-list"></div>
+        </div>
+
+        <div id="view-mis-reservas" class="hidden">
+            <h2 style="margin-bottom: 25px; font-weight: 400;">Sus Reservas</h2>
+            <div id="my-reservations-list"></div>
+        </div>
+
+        <div id="view-info" class="hidden">
+            <h2 style="margin-bottom: 25px; font-weight: 400;">Detalles</h2>
+            <div class="info-grid">
+                <div class="info-card" style="background: #0a0a0a; border: 1px solid var(--border); padding: 20px; border-radius: 12px; margin-bottom: 15px; cursor: pointer;" onclick="window.open('https://maps.app.goo.gl/smt2wC8yPApUYDTW8')">
+                    <h4 style="font-size: 0.7rem; color: var(--text-s); margin-bottom: 10px; letter-spacing: 1px;">UBICACIÓN</h4>
+                    <p>Haga clic para abrir en Google Maps.</p>
+                </div>
+
+                <div class="info-card" style="background: #0a0a0a; border: 1px solid var(--border); padding: 20px; border-radius: 12px; margin-bottom: 15px;">
+                    <h4 style="font-size: 0.7rem; color: var(--text-s); margin-bottom: 10px; letter-spacing: 1px;">CONTACTO</h4>
+                    <p>WhatsApp: <strong>+52 614 253 1256</strong></p>
+                    <button class="btn-action" style="margin-top:10px; width:100%" onclick="window.open('https://wa.me/526142531256')">Enviar Mensaje</button>
+                </div>
+
+                <div class="info-card" style="background: #0a0a0a; border: 1px solid var(--border); padding: 20px; border-radius: 12px; margin-bottom: 15px;">
+                    <h4 style="font-size: 0.7rem; color: var(--text-s); margin-bottom: 10px; letter-spacing: 1px;">PRECIOS</h4>
+                    <p>Los precios pueden cotizarse en las oficinas o por vía WhatsApp.</p>
+                    <p style="font-size: 0.75rem; color: var(--text-s); margin-top: 5px;">Aceptamos efectivo, tarjeta o transferencia.</p>
+                </div>
+
+                <div class="info-card" style="background: #0a0a0a; border: 1px solid var(--border); padding: 20px; border-radius: 12px; margin-bottom: 15px;">
+                    <h4 style="font-size: 0.7rem; color: var(--text-s); margin-bottom: 10px; letter-spacing: 1px;">REGLAMENTO</h4>
+                    <p style="font-size: 0.85rem; line-height: 1.5;">
+                        • Uso de calzado deportivo adecuado.<br>
+                        • Prohibido ingresar alimentos a la cancha.<br>
+                        • Tolerancia máxima de 15 minutos.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div id="view-perfil" class="hidden">
+            <h2 style="margin-bottom: 25px; font-weight: 400;">Perfil</h2>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                <div style="grid-column: span 2;">
+                    <label style="font-size: 0.6rem; color: var(--text-s);">EMAIL</label>
+                    <input type="text" id="u-email" disabled>
+                </div>
+                <div style="grid-column: span 2;">
+                    <label style="font-size: 0.6rem; color: var(--text-s);">NOMBRE(S)</label>
+                    <input type="text" id="u-nombre" placeholder="Obligatorio">
+                </div>
+                <div>
+                    <label style="font-size: 0.6rem; color: var(--text-s);">APELLIDO PATERNO</label>
+                    <input type="text" id="u-paterno" placeholder="Obligatorio">
+                </div>
+                <div>
+                    <label style="font-size: 0.6rem; color: var(--text-s);">TELÉFONO CELULAR</label>
+                    <input type="tel" id="u-phone" placeholder="10 dígitos">
+                </div>
+            </div>
+            <button class="btn-p" onclick="saveProfile()">Actualizar Datos</button>
+            <p id="profile-success" style="color: var(--success); font-size: 0.8rem; text-align: center; margin-top: 15px; display: none;">¡Cambios guardados!</p>
+        </div>
+    </div>
+</div>
+
+<script>
+    const firebaseConfig = {
+        apiKey: "AIzaSyAEiNdPIcFY-CC3R4YpDrROv_ERC4Pquvw",
+        authDomain: "horarios-16943.firebaseapp.com",
+        databaseURL: "https://horarios-16943-default-rtdb.firebaseio.com",
+        projectId: "horarios-16943",
+        storageBucket: "horarios-16943.firebasestorage.app",
+        messagingSenderId: "278418928966",
+        appId: "1:278418928966:web:695adf6cbeee5dafb42147"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.database();
+
+    let isLogin = true; 
+    let currentViewingDate = new Date();
+    const today = new Date();
+    
+    const hours = ["16:00 - 18:00", "18:00 - 20:00"];
+    const canchas = ["Cancha 1", "Cancha 2"];
+    
+    function solicitarPermisoNotificaciones() {
+        if ("Notification" in window && Notification.permission !== "granted") {
+            Notification.requestPermission();
+        }
+    }
+
+    function enviarNotificacion(titulo, mensaje) {
+        if ("Notification" in window && Notification.permission === "granted") {
+            new Notification(titulo, { body: mensaje });
+        }
+    }
+
+    function togglePassword(id) {
+        const input = document.getElementById(id);
+        const btn = input.nextElementSibling;
+        if (input.type === "password") {
+            input.type = "text";
+            btn.innerText = "Ocultar";
+        } else {
+            input.type = "password";
+            btn.innerText = "Ver";
+        }
+    }
+
+    function generateGoogleCalendarLink(dateStr, hourRange, cancha) {
+        const times = hourRange.replace(/_/g, '').split('-');
+        const startH = times[0].split(':')[0];
+        const endH = times[1].split(':')[0];
+        const dateClean = dateStr.replace(/-/g, '');
+        const text = encodeURIComponent(`Reserva ${cancha} - SGP Cloud`);
+        return `https://www.google.com/calendar/render?action=TEMPLATE&text=${text}&dates=${dateClean}T${startH}0000/${dateClean}T${endH}0000`;
+    }
+
+    function handleAuthEnter(event) { if (event.key === "Enter") handleAuth(); }
+
+    async function handleAuth() {
+        const email = document.getElementById('email').value.trim();
+        const pass = document.getElementById('pass').value;
+        if(!email || !pass) return alert("Por favor complete los campos.");
+        try {
+            if(isLogin) {
+                await auth.signInWithEmailAndPassword(email, pass);
+            } else {
+                const passConf = document.getElementById('pass-conf').value;
+                if(pass !== passConf) return alert("Las contraseñas no coinciden.");
+                const cred = await auth.createUserWithEmailAndPassword(email, pass);
+                const key = email.replace(/\./g, '_');
+                await db.ref('usuarios/' + key).set({ email, uid: cred.user.uid, nombre: "", paterno: "", telefono: "" });
+            }
+            solicitarPermisoNotificaciones();
+        } catch(e) { alert(e.message); }
+    }
+
+    function updateDateUI() {
+        const dateName = currentViewingDate.toLocaleDateString('es-ES', { weekday: 'long' });
+        const fullDate = currentViewingDate.toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' });
+        document.getElementById('display-date-name').innerText = dateName.toUpperCase();
+        document.getElementById('display-full-date').innerText = fullDate;
+        document.getElementById('prev-day').disabled = currentViewingDate.toDateString() === today.toDateString();
+        renderSchedule();
+    }
+
+    function changeDay(delta) {
+        currentViewingDate.setDate(currentViewingDate.getDate() + delta);
+        updateDateUI();
+    }
+
+    function renderSchedule() {
+        const dateKey = currentViewingDate.toISOString().split('T')[0];
+        const isToday = currentViewingDate.toDateString() === today.toDateString();
+        const currentHour = new Date().getHours();
+
+        db.ref('reservas/' + dateKey).on('value', snap => {
+            const data = snap.val() || {};
+            const container = document.getElementById('schedule-list');
+            container.innerHTML = '';
+
+            hours.forEach(h => {
+                const hKey = h.replace(/[:\s]/g, '_');
+                const hourStart = parseInt(h.split(':')[0]);
+                const isPast = isToday && hourStart < currentHour;
+                
+                let html = `<div class="slot">
+                                <p style="font-weight:600; letter-spacing:1px; margin-bottom:10px; color:var(--text-s); font-size:0.75rem;">${h}</p>`;
+                
+                canchas.forEach(c => {
+                    const cKey = c.replace(/\s/g, '');
+                    const reservedBy = data[hKey] ? data[hKey][cKey] : null;
+                    let actionBtn = "";
+
+                    if(isPast) {
+                        actionBtn = `<button class="btn-action" disabled style="opacity:0.2">Pasado</button>`;
+                    } else if(reservedBy) {
+                        if(reservedBy === 'BLOQUEADO') {
+                            actionBtn = `<button class="btn-action" disabled style="color:var(--error); border:none;">Cerrado</button>`;
+                        } else if(reservedBy === auth.currentUser.email) {
+                            actionBtn = `<button class="btn-action" style="color:var(--error); border-color:var(--error)" onclick="cancel('${dateKey}','${hKey}','${cKey}')">Cancelar</button>`;
+                        } else {
+                            actionBtn = `<button class="btn-action" disabled style="opacity:0.2">Ocupado</button>`;
+                        }
+                    } else {
+                        actionBtn = `<button class="btn-action" onclick="book('${dateKey}','${hKey}','${cKey}')">Reservar</button>`;
+                    }
+                    html += `<div class="cancha-row"><span>${c}</span>${actionBtn}</div>`;
+                });
+                html += `</div>`;
+                container.insertAdjacentHTML('beforeend', html);
+            });
+        });
+    }
+
+    function book(d, hK, cK) { 
+        db.ref(`reservas/${d}/${hK}/${cK}`).set(auth.currentUser.email).then(() => {
+            enviarNotificacion("SGP Cloud", "Reserva exitosa.");
+        }); 
+    }
+    
+    function cancel(d, hK, cK) { 
+        if(confirm("¿Desea usted cancelar este turno?")) {
+            db.ref(`reservas/${d}/${hK}/${cK}`).remove().then(() => {
+                enviarNotificacion("SGP Cloud", "Turno cancelado.");
+            });
+        }
+    }
+
+    auth.onAuthStateChanged(user => {
+        if (user) {
+            document.getElementById('auth-section').classList.add('hidden');
+            document.getElementById('app-section').classList.remove('hidden');
+            updateDateUI();
+            checkProfileData();
+            showSection(localStorage.getItem('currentSection') || 'reservar', true);
+        } else {
+            document.getElementById('auth-section').classList.remove('hidden');
+            document.getElementById('app-section').classList.add('hidden');
+        }
+    });
+
+    function checkProfileData() {
+        const user = auth.currentUser;
+        if(!user) return;
+        const key = user.email.replace(/\./g, '_');
+        document.getElementById('u-email').value = user.email;
+        db.ref('usuarios/' + key).on('value', snap => {
+            const data = snap.val() || {};
+            const incompleto = !data.nombre || !data.paterno || !data.telefono;
+            document.getElementById('icon-badge').style.display = incompleto ? 'flex' : 'none';
+            document.getElementById('user-display').innerText = (data.nombre || user.email.split('@')[0]).toUpperCase();
+            document.getElementById('u-nombre').value = data.nombre || "";
+            document.getElementById('u-paterno').value = data.paterno || "";
+            document.getElementById('u-phone').value = data.telefono || "";
+        });
+    }
+
+    async function saveProfile() {
+        const n = document.getElementById('u-nombre').value.trim();
+        const p = document.getElementById('u-paterno').value.trim();
+        const ph = document.getElementById('u-phone').value.trim();
+        if (!n || !p || !ph) return alert("Complete los campos obligatorios.");
+        const key = auth.currentUser.email.replace(/\./g, '_');
+        await db.ref('usuarios/' + key).update({ nombre: n, paterno: p, telefono: ph });
+        document.getElementById('profile-success').style.display = 'block';
+        setTimeout(() => document.getElementById('profile-success').style.display = 'none', 3000);
+    }
+
+    function loadMyReservations() {
+        const container = document.getElementById('my-reservations-list');
+        const email = auth.currentUser.email;
+        db.ref('reservas').on('value', snap => {
+            const all = snap.val() || {};
+            container.innerHTML = '';
+            let has = false;
+            Object.keys(all).forEach(day => {
+                Object.keys(all[day]).forEach(hK => {
+                    Object.keys(all[day][hK]).forEach(cK => {
+                        if (all[day][hK][cK] === email) {
+                            has = true;
+                            const calLink = generateGoogleCalendarLink(day, hK, cK);
+                            container.innerHTML += `<div class="slot">
+                                <div><p style="font-size:0.7rem; color:var(--text-s)">${day}</p>
+                                <p style="font-weight:bold">${hK.replace(/_/g,':').substring(0,13)} - ${cK}</p></div>
+                                <div style="display:flex; gap:10px; margin-top:10px;">
+                                    <button class="btn-cal" onclick="window.open('${calLink}')">Agendar</button>
+                                    <button class="btn-action" style="color:var(--error); border-color:var(--error)" onclick="cancel('${day}','${hK}','${cK}')">Eliminar</button>
+                                </div></div>`;
+                        }
+                    });
+                });
+            });
+            if(!has) container.innerHTML = '<p style="color:var(--text-s); text-align:center; margin-top:40px;">No tiene turnos pendientes.</p>';
+        });
+    }
+
+    function showSection(s, skip = false) {
+        ['reservar','mis-reservas','info','perfil'].forEach(v => document.getElementById('view-'+v).classList.add('hidden'));
+        document.getElementById('view-'+s).classList.remove('hidden');
+        if(s === 'mis-reservas') loadMyReservations();
+        if(!skip) localStorage.setItem('currentSection', s);
+        if(document.getElementById('side-menu').classList.contains('open')) toggleMenu();
+    }
+
+    function toggleMenu() {
+        document.getElementById('side-menu').classList.toggle('open');
+        document.getElementById('overlay').classList.toggle('show');
+    }
+
+    function toggleAuth() {
+        isLogin = !isLogin;
+        document.getElementById('btn-main-auth').innerText = isLogin ? "Entrar" : "Crear Cuenta";
+        document.getElementById('reg-extra').classList.toggle('hidden', isLogin);
+    }
+
+    function logout() { localStorage.removeItem('currentSection'); auth.signOut().then(() => location.reload()); }
+
+    let timeoutInactividad;
+    function reiniciarTemporizador() {
+        clearTimeout(timeoutInactividad);
+        timeoutInactividad = setTimeout(() => {
+            alert("Usted ha estado inactivo. Sesión cerrada por seguridad.");
+            logout();
+        }, 600000); 
+    }
+    ['onload','onmousemove','onkeypress','ontouchstart','onclick'].forEach(e => window[e] = reiniciarTemporizador);
+</script>
+</body>
+</html>
